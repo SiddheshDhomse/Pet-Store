@@ -10,16 +10,6 @@ const firebaseConfig = {
     measurementId: "G-VJ4BJ8TQBB"
 };
 
-// Define handleBarcodeInput function
-function handleBarcodeInput(event) {
-    if (event.key === 'Enter') {
-        const barcode = event.target.value;
-        const discount = parseFloat(document.getElementById('discountInput').value) || 0;
-        addProductToBill(barcode);
-        event.target.value = ''; // Clear barcode input field
-    }
-}
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
@@ -27,31 +17,19 @@ const database = firebase.database();
 let totalAmount = 0;
 let discountAmount = 0;
 
-// Handle offline mode
-document.addEventListener('DOMContentLoaded', (event) => {
-    if (!navigator.onLine) {
-        alert('You are currently offline. Please check your internet connection.');
-    }
-});
-
 // Handle barcode input
-document.getElementById('barcodeInput').addEventListener('keypress', function(event) {
+function handleBarcodeInput(event) {
     if (event.key === 'Enter') {
-        const barcode = this.value;
-        const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+        const barcode = document.getElementById('barcodeInput').value;
         addProductToBill(barcode);
-        this.value = ''; // Clear barcode input field
+        document.getElementById('barcodeInput').value = ''; // Clear barcode input field
     }
-});
+}
 
 // Handle discount input
-document.getElementById('discountInput').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        // Apply discount and update totals
-        discountAmount = parseFloat(this.value) || 0;
-        updateTotals();
-        this.value = ''; // Clear discount input field
-    }
+document.getElementById('discountInput').addEventListener('change', function() {
+    discountAmount = parseFloat(this.value) || 0;
+    updateTotals();
 });
 
 function addProductToBill(barcode) {
@@ -120,6 +98,21 @@ function updateTotals() {
 }
 
 function proceedToCheckout() {
-    // Redirect to checkout.html
+    // Save cart details to localStorage before proceeding to checkout
+    const cartItems = Array.from(document.querySelectorAll('#billTable tbody tr')).map(row => {
+        return {
+            barcode: row.cells[0].textContent,
+            name: row.cells[1].textContent,
+            quantity: parseInt(row.cells[2].textContent),
+            price: parseFloat(row.cells[3].textContent)
+        };
+    });
+
+    localStorage.setItem('customerName', document.getElementById('customerName').value);
+    localStorage.setItem('customerEmail', document.getElementById('customerEmail').value);
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    localStorage.setItem('discount', discountAmount);
+
+    // Redirect to checkout page
     window.location.href = 'checkout.html';
 }
