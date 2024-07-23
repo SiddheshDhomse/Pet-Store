@@ -1,14 +1,14 @@
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyB5ZbDhW6CS0FtTO9uKCHBKLd7T2Ukqrco",
-    authDomain: "pets-store-app-baa92.firebaseapp.com",
-    databaseURL: "https://pets-store-app-baa92-default-rtdb.firebaseio.com",
-    projectId: "pets-store-app-baa92",
-    storageBucket: "pets-store-app-baa92.appspot.com",
-    messagingSenderId: "1000026829094",
-    appId: "1:1000026829094:web:04dcb2f1bdc46fdeb111e7",
-    measurementId: "G-VJ4BJ8TQBB"
-};
+    apiKey: "AIzaSyCh17JupaGm8uCV3UI9DWjvfJ7PaVt2o-g",
+    authDomain: "pet-store-billing.firebaseapp.com",
+    databaseURL: "https://pet-store-billing-default-rtdb.firebaseio.com",
+    projectId: "pet-store-billing",
+    storageBucket: "pet-store-billing.appspot.com",
+    messagingSenderId: "146782373741",
+    appId: "1:146782373741:web:f79a227313a43edc81fc64",
+    measurementId: "G-W67RCM2HYT"
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -19,7 +19,7 @@ function populateCheckout() {
     const customerName = localStorage.getItem('customerName');
     const customerEmail = localStorage.getItem('customerEmail');
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discount = parseFloat(localStorage.getItem('discount')) || 0;
 
     document.getElementById('customerName').value = customerName || '';
     document.getElementById('customerEmail').value = customerEmail || '';
@@ -27,15 +27,24 @@ function populateCheckout() {
     const checkoutTableBody = document.getElementById('checkoutTable').getElementsByTagName('tbody')[0];
     checkoutTableBody.innerHTML = ''; // Clear existing rows
 
+    let totalPrice = 0;
+
     cartItems.forEach(item => {
         const row = checkoutTableBody.insertRow();
         row.insertCell(0).textContent = item.barcode;
         row.insertCell(1).textContent = item.name;
         row.insertCell(2).textContent = item.quantity;
-        row.insertCell(3).textContent = (item.price * item.quantity).toFixed(2);
+        const itemTotal = item.price * item.quantity;
+        row.insertCell(3).textContent = itemTotal.toFixed(2);
+        totalPrice += itemTotal;
     });
 
-    document.getElementById('totalPrice').textContent = `$${totalPrice.toFixed(2)}`;
+    const discountAmount = (totalPrice * (discount / 100)).toFixed(2);
+    const finalAmount = (totalPrice - discountAmount).toFixed(2);
+
+    document.getElementById('totalPrice').textContent = `Rs ${totalPrice.toFixed(2)}`;
+    document.getElementById('discountAmount').textContent = `Rs ${discountAmount}`;
+    document.getElementById('finalAmount').textContent = `Rs ${finalAmount}`;
 }
 
 // Function to complete purchase
@@ -50,7 +59,10 @@ function completePurchase() {
     }
 
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const discount = parseFloat(localStorage.getItem('discount')) || 0;
     const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discountAmount = (totalPrice * (discount / 100)).toFixed(2);
+    const finalAmount = (totalPrice - discountAmount).toFixed(2);
 
     // Save purchase details to Firebase
     const purchaseId = database.ref('purchases').push().key;
@@ -59,6 +71,8 @@ function completePurchase() {
         customerEmail,
         items: cartItems,
         totalPrice,
+        discountAmount,
+        finalAmount,
         paymentMethod,
         purchaseDate: new Date().toISOString()
     }).then(() => {
@@ -66,6 +80,7 @@ function completePurchase() {
         localStorage.removeItem('cartItems');
         localStorage.removeItem('customerName');
         localStorage.removeItem('customerEmail');
+        localStorage.removeItem('discount');
         window.location.href = 'index.html'; // Redirect to home or another page
     }).catch(error => {
         console.error('Error completing purchase:', error);
