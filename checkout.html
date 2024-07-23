@@ -11,6 +11,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
+
+
 
     <title>Checkout</title>
 </head>
@@ -108,6 +112,8 @@
 
                             <!-- Checkout Button -->
                             <button onclick="completePurchase()" class="btn btn-primary w-full mt-4">Complete Purchase</button>
+                            <button onclick="printPDF()" class="btn btn-secondary w-full mt-2">Print as PDF</button>
+
                         </div>
                     </div>
                 </div>
