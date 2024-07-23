@@ -8,7 +8,7 @@ const firebaseConfig = {
     messagingSenderId: "146782373741",
     appId: "1:146782373741:web:f79a227313a43edc81fc64",
     measurementId: "G-W67RCM2HYT"
-  };
+};
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -60,7 +60,7 @@ function addProductToBill(barcode) {
                     let quantityCell = row.cells[2];
                     let priceCell = row.cells[3];
                     let quantity = parseInt(quantityCell.textContent) + 1;
-                    let totalPrice = parseFloat(priceCell.textContent) + product.price;
+                    let totalPrice = product.price * quantity;
 
                     quantityCell.textContent = quantity;
                     priceCell.textContent = totalPrice.toFixed(2);
@@ -99,7 +99,9 @@ function removeProduct(button) {
 function updateTotals() {
     // Calculate total amount without discount
     totalAmount = Array.from(document.querySelectorAll('#billTable tbody tr')).reduce((sum, row) => {
-        return sum + parseFloat(row.cells[3].textContent);
+        const quantity = parseInt(row.cells[2].textContent);
+        const price = parseFloat(row.cells[3].textContent) / quantity;
+        return sum + (quantity * price);
     }, 0);
 
     // Calculate discount on total amount
@@ -113,7 +115,7 @@ function updateTotals() {
 }
 
 function proceedToCheckout() {
-    // Save cart details to localStorage before proceeding to checkout
+    // Save cart details to sessionStorage before proceeding to checkout
     const cartItems = Array.from(document.querySelectorAll('#billTable tbody tr')).map(row => {
         return {
             barcode: row.cells[0].textContent,
@@ -123,10 +125,10 @@ function proceedToCheckout() {
         };
     });
 
-    localStorage.setItem('customerName', document.getElementById('customerName').value);
-    localStorage.setItem('customerEmail', document.getElementById('customerEmail').value);
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    localStorage.setItem('discount', discountAmount);
+    sessionStorage.setItem('customerName', document.getElementById('customerName').value);
+    sessionStorage.setItem('customerEmail', document.getElementById('customerEmail').value);
+    sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
+    sessionStorage.setItem('discount', discountAmount);
 
     // Redirect to checkout page
     window.location.href = 'checkout.html';
