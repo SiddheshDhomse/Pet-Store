@@ -8,7 +8,7 @@ const firebaseConfig = {
     messagingSenderId: "146782373741",
     appId: "1:146782373741:web:f79a227313a43edc81fc64",
     measurementId: "G-W67RCM2HYT"
-  };
+};
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -85,6 +85,68 @@ function completePurchase() {
     }).catch(error => {
         console.error('Error completing purchase:', error);
     });
+}
+
+// Function to generate and print the PDF
+function printPDF() {
+    const customerName = document.getElementById('customerName').value;
+    const customerEmail = document.getElementById('customerEmail').value;
+    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discount = parseFloat(localStorage.getItem('discount')) || 0;
+    const discountAmount = (totalPrice * (discount / 100)).toFixed(2);
+    const finalAmount = (totalPrice - discountAmount).toFixed(2);
+    const purchaseDate = new Date().toLocaleDateString();
+    const billNumber = Math.floor(Math.random() * 1000000); // Generate a random bill number for demonstration
+
+    const docDefinition = {
+        content: [
+            { text: 'PETS GLORIOUS', style: 'header' },
+            { text: `Bill No: ${billNumber}`, style: 'subheader' },
+            { text: `Date: ${purchaseDate}`, style: 'subheader' },
+            { text: `Customer Name: ${customerName}`, style: 'details' },
+            { text: `Customer Email: ${customerEmail}`, style: 'details' },
+            { text: 'List of Items:', style: 'subheader' },
+            {
+                table: {
+                    headerRows: 1,
+                    widths: ['*', '*', 'auto', 'auto'],
+                    body: [
+                        ['Barcode', 'Product Name', 'Quantity', 'Price'],
+                        ...cartItems.map(item => [
+                            item.barcode,
+                            item.name,
+                            item.quantity,
+                            (item.price * item.quantity).toFixed(2)
+                        ]),
+                        ['', '', 'Total:', totalPrice.toFixed(2)],
+                        ['', '', 'Discount:', discountAmount],
+                        ['', '', 'Final Amount:', finalAmount]
+                    ]
+                },
+                layout: 'lightHorizontalLines'
+            }
+        ],
+        styles: {
+            header: {
+                fontSize: 18,
+                bold: true,
+                alignment: 'center',
+                margin: [0, 0, 0, 10]
+            },
+            subheader: {
+                fontSize: 14,
+                bold: true,
+                margin: [0, 10, 0, 5]
+            },
+            details: {
+                fontSize: 12,
+                margin: [0, 5, 0, 5]
+            }
+        }
+    };
+
+    pdfMake.createPdf(docDefinition).download(`Bill_${billNumber}.pdf`);
 }
 
 // Populate checkout page on load
