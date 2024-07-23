@@ -1,14 +1,14 @@
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyB5ZbDhW6CS0FtTO9uKCHBKLd7T2Ukqrco",
-    authDomain: "pets-store-app-baa92.firebaseapp.com",
-    databaseURL: "https://pets-store-app-baa92-default-rtdb.firebaseio.com",
-    projectId: "pets-store-app-baa92",
-    storageBucket: "pets-store-app-baa92.appspot.com",
-    messagingSenderId: "1000026829094",
-    appId: "1:1000026829094:web:04dcb2f1bdc46fdeb111e7",
-    measurementId: "G-VJ4BJ8TQBB"
-};
+    apiKey: "AIzaSyCh17JupaGm8uCV3UI9DWjvfJ7PaVt2o-g",
+    authDomain: "pet-store-billing.firebaseapp.com",
+    databaseURL: "https://pet-store-billing-default-rtdb.firebaseio.com",
+    projectId: "pet-store-billing",
+    storageBucket: "pet-store-billing.appspot.com",
+    messagingSenderId: "146782373741",
+    appId: "1:146782373741:web:f79a227313a43edc81fc64",
+    measurementId: "G-W67RCM2HYT"
+  };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -16,6 +16,21 @@ const database = firebase.database();
 
 let totalAmount = 0;
 let discountAmount = 0;
+
+const customerNameInput = document.getElementById('customerName');
+const customerEmailInput = document.getElementById('customerEmail');
+const proceedButton = document.querySelector('button[onclick="proceedToCheckout()"]');
+
+// Check form validity
+function checkFormValidity() {
+    const isNameFilled = customerNameInput.value.trim() !== '';
+    const isEmailFilled = customerEmailInput.value.trim() !== '';
+    proceedButton.disabled = !(isNameFilled && isEmailFilled);
+}
+
+// Add event listeners to input fields
+customerNameInput.addEventListener('input', checkFormValidity);
+customerEmailInput.addEventListener('input', checkFormValidity);
 
 // Handle barcode input
 function handleBarcodeInput(event) {
@@ -92,9 +107,9 @@ function updateTotals() {
     const finalAmount = totalAmount - discountValue;
 
     // Update HTML elements
-    document.getElementById('totalAmount').textContent = `$${totalAmount.toFixed(2)}`;
-    document.getElementById('discountAmount').textContent = `$${discountValue.toFixed(2)}`;
-    document.getElementById('finalAmount').textContent = `$${finalAmount.toFixed(2)}`;
+    document.getElementById('totalAmount').textContent = `Rs${totalAmount.toFixed(2)}`;
+    document.getElementById('discountAmount').textContent = `Rs${discountValue.toFixed(2)}`;
+    document.getElementById('finalAmount').textContent = `Rs${finalAmount.toFixed(2)}`;
 }
 
 function proceedToCheckout() {
